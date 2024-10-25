@@ -13,11 +13,11 @@ Website Pendidikan is a website that provides teaching and learning activities s
 
 ## How to install and run
 
-Step 1. php artisan key:generate
-Step 2. composer install & update
-Step 3. npm install
-Step 4. php artisan serve
-Step 5. npm run dev
+-   Step 1. php artisan key:generate
+-   Step 2. composer install & update
+-   Step 3. npm install
+-   Step 4. php artisan serve
+-   Step 5. npm run dev
 
 ## Library and package using
 
