@@ -16,15 +16,18 @@ class RoleandPermissionSeeder extends Seeder
     public function run(): void
     {
 
-        // Membuat permission
-        // Permission::create(['name' => 'develop']);
+        Membuat permission
+        Permission::create(['name' => 'develop']);
 
         // Membuat role dan menetapkan permission ke role tersebut
-        $role = Role::create(['name' => 'guest']);
-        // $role->givePermissionTo('develop');
+        Role::create(['name' => 'guest']);
+        Role::create(['name' => 'teacher']);
+        $role = Role::create(['name' => 'student']);
+        $role = Role::create(['name' => 'administrator']);
+        Role::create(['name' => 'administrator']);
 
-        // // Menetapkan role ke user
-        // $user = User::find(2);
-        // $user->assignRole('administrator');
+        // Menetapkan role ke user
+        $user = User::find(1);
+        $user->assignRole('administrator');
     }
 }
