@@ -12,10 +12,13 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Spatie\Permission\Models\Role;
+use Filament\Tables\Grouping\Group;
+
 
 class UserResource extends Resource
 {
@@ -28,9 +31,11 @@ class UserResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
+    protected static ?string $modelLabel = null;
+
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static ?string $navigationGroup = 'Settings';
+    protected static ?string $navigationGroup = null;
 
     /**
      * Function to controll access this menu
@@ -39,17 +44,27 @@ class UserResource extends Resource
      */
     public static function canAccess(): bool
     {
-        return auth()->user()->isAdmin();
+        // static::$slug = auth()->user()->isTeacher() ? 'siswa' : null;
+
+        static::$modelLabel = auth()->user()->isTeacher() ? 'siswa' : null;
+
+        static::$navigationGroup = auth()->user()->isTeacher() ? null : 'Settings';
+
+        return auth()->user()->hasRole(['administrator', 'teacher']);
     }
 
     /**
-     * Function to edit QueryBuilder
+     * Function to modify QueryBuilder
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return parent::getEloquentQuery()->where('id', '!=', Auth::id());
+        if (auth()->user()->hasRole('teacher')) {
+            return parent::getEloquentQuery()->where('id', '!=', Auth::id())->role('student');
+        } else {
+            return parent::getEloquentQuery()->where('id', '!=', Auth::id());
+        }
     }
 
     /**
@@ -71,11 +86,10 @@ class UserResource extends Resource
                     ->hiddenOn('edit'),
                 Forms\Components\Select::make('role')
                     ->label('Roles')
-                    ->relationship('roles', 'name') // Relasi 'roles' dengan nama 'name'
-                    // ->multiple() // Memungkinkan memilih beberapa role sekaligus
-                    ->preload() // Preload options untuk mempercepat pencarian
-                    // ->required()
-                    ->searchable(),
+                    ->relationship('roles', 'name')
+                    ->preload()
+                    ->searchable()
+                    ->visible(auth()->user()->isAdmin()),
                 Forms\Components\TextInput::make('password')
                     ->password()
                     ->required()
@@ -101,7 +115,7 @@ class UserResource extends Resource
                     'success' => 'administrator',
                     'primary' => 'student',
                     'warning' => 'teacher',
-                ]),
+                ])->visible(auth()->user()->isAdmin()),
                 Tables\Columns\ViewColumn::make('email_verified_at')->view('tables.columns.status-switcher')
             ])
             ->filters([
@@ -114,8 +128,41 @@ class UserResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\BulkAction::make('Change Role')
+                        ->label('Change Role')
+                        ->action(fn(Collection $records) => static::changeRole($records))
+                        ->form([
+                            Forms\Components\Select::make('role')
+                                ->label('Pilih Role')
+                                ->relationship('roles', 'name')
+                                // ->preload()
+                                ->searchable()
+                                ->required(),
+                        ])
+                        ->requiresConfirmation()
+                        ->color('success')
+                        ->icon('heroicon-o-user'),
                 ]),
-            ]);
+            ])
+            ->defaultSort('name')
+            // ->groups([Group::make('roles.name')
+            //     ->label('Role')])
+        ;
+    }
+
+    /**
+     * Change Role Users with using Tables\Actions\BulkAction
+     *
+     * @param Collection $users
+     *
+     * @return void
+     */
+    protected static function changeRole(Collection $users): void
+    {
+        foreach ($users as $user) {
+            $user->syncRoles('student'); // Pastikan 'role' adalah nama kolom role di tabel users
+            $user->save();
+        }
     }
 
     public static function getRelations(): array
@@ -126,7 +173,7 @@ class UserResource extends Resource
     }
 
     /**
-     * Router maker for CRUD
+     * Routes maker for CRUD
      *
      * @return array
      */

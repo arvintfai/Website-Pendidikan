@@ -16,6 +16,11 @@ use Spatie\Permission\Models\Permission as ModelsPermission;
 
 class PermissionResource extends Resource
 {
+    /**
+     * Define string variable
+     *
+     * @var string|null
+     */
     protected static ?string $model = ModelsPermission::class;
 
     protected static ?string $navigationIcon = 'heroicon-s-arrow-long-right';
@@ -32,6 +37,13 @@ class PermissionResource extends Resource
         return auth()->user()->isAdmin();
     }
 
+    /**
+     * Create Form for create and edit
+     *
+     * @param Form $form
+     *
+     * @return Form
+     */
     public static function form(Form $form): Form
     {
         return $form
@@ -48,6 +60,13 @@ class PermissionResource extends Resource
             ]);
     }
 
+    /**
+     * Create table faster
+     *
+     * @param Table $table
+     *
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -76,6 +95,11 @@ class PermissionResource extends Resource
         ];
     }
 
+    /**
+     * Routes maker for CRUD
+     *
+     * @return array
+     */
     public static function getPages(): array
     {
         return [

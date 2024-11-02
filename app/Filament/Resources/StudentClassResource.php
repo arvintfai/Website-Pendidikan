@@ -2,9 +2,10 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\RoleResource\Pages;
-use App\Filament\Resources\RoleResource\RelationManagers;
-use App\Models\Role;
+use App\Filament\Resources\StudentClassResource\Pages;
+use App\Filament\Resources\StudentClassResource\RelationManagers;
+use App\Models\StudentClass;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -12,20 +13,19 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Spatie\Permission\Models\Role as ModelsRole;
 
-class RoleResource extends Resource
+class StudentClassResource extends Resource
 {
     /**
      * Define string variable
      *
      * @var string|null
      */
-    protected static ?string $model = ModelsRole::class;
+    protected static ?string $model = StudentClass::class;
 
-    protected static ?string $navigationIcon = 'heroicon-m-briefcase';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationGroup = 'Settings';
+    protected static ?string $modelLabel = 'Kelas';
 
     /**
      * Function to controll access this menu
@@ -34,7 +34,7 @@ class RoleResource extends Resource
      */
     public static function canAccess(): bool
     {
-        return auth()->user()->isAdmin();
+        return auth()->user()->hasRole(['administrator', 'teacher']);
     }
 
     /**
@@ -50,12 +50,18 @@ class RoleResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('name')
                     ->required(),
-                Forms\Components\Select::make('permisson')
-                    ->label('Izin')
-                    ->relationship('permissions', 'name') // Relasi 'roles' dengan nama 'name'
+                Forms\Components\Select::make('user')
+                    ->label('Student')
+                    ->relationship('users', 'name') // Relasi 'roles' dengan nama 'name'
+                    ->options(function () {
+                        return User::whereHas('roles', function ($query) {
+                            $query->where('name', 'student');
+                        })
+                            ->whereDoesntHave('student_classes')
+                            ->pluck('name', 'id');
+                    })
                     ->multiple() // Memungkinkan memilih beberapa role sekaligus
                     ->preload() // Preload options untuk mempercepat pencarian
-                    // ->required()
                     ->searchable(),
             ]);
     }
@@ -72,7 +78,7 @@ class RoleResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')->searchable()->label('Nama'),
-                Tables\Columns\TextColumn::make('permissions.name'),
+                Tables\Columns\TextColumn::make('users.name')->label('student')->badge(),
             ])
             ->filters([
                 //
@@ -103,9 +109,9 @@ class RoleResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListRoles::route('/'),
-            'create' => Pages\CreateRole::route('/create'),
-            'edit' => Pages\EditRole::route('/{record}/edit'),
+            'index' => Pages\ListStudentClasses::route('/'),
+            'create' => Pages\CreateStudentClass::route('/create'),
+            'edit' => Pages\EditStudentClass::route('/{record}/edit'),
         ];
     }
 }

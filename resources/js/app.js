@@ -1,3 +1,9 @@
+import Alpine from "alpinejs";
+
+window.Alpine = Alpine;
+
+Alpine.start();
+
 const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
 const body = document.html;
 
@@ -16,9 +22,3 @@ prefersDarkScheme.addEventListener("change", (e) => {
         document.documentElement.classList.remove("dark");
     }
 });
-
-import Alpine from "alpinejs";
-
-window.Alpine = Alpine;
-
-Alpine.start();

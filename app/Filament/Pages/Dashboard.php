@@ -11,6 +11,8 @@ use Illuminate\Contracts\Support\Htmlable;
 
 class Dashboard extends Page
 {
+    protected static ?string $label = 'Dashboard';
+
     protected static ?string $navigationIcon = 'heroicon-o-home';
 
     protected static ?int $navigationSort = -2;
