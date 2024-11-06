@@ -18,7 +18,9 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Spatie\Permission\Models\Role;
 use Filament\Tables\Grouping\Group;
-
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
+use App\Models\StudentClass;
 
 class UserResource extends Resource
 {
@@ -29,6 +31,8 @@ class UserResource extends Resource
      */
     protected static ?string $model = User::class;
 
+    protected static ?string $slug = 'users';
+
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
     protected static ?string $modelLabel = null;
@@ -37,6 +41,12 @@ class UserResource extends Resource
 
     protected static ?string $navigationGroup = null;
 
+    public static function getSlug(): string
+    {
+        // return static::isTeacher() ? 'siswa' : 'users';
+        return self::$slug;
+    }
+
     /**
      * Function to controll access this menu
      *
@@ -44,8 +54,6 @@ class UserResource extends Resource
      */
     public static function canAccess(): bool
     {
-        // static::$slug = auth()->user()->isTeacher() ? 'siswa' : null;
-
         static::$modelLabel = auth()->user()->isTeacher() ? 'siswa' : null;
 
         static::$navigationGroup = auth()->user()->isTeacher() ? null : 'Settings';
@@ -79,20 +87,49 @@ class UserResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
+                    ->label('Nama')
                     ->required(),
                 Forms\Components\TextInput::make('email')
-                    ->email()
+                    ->label('username')
+                    // ->email()
                     ->required()
                     ->hiddenOn('edit'),
-                Forms\Components\Select::make('role')
+
+                Forms\Components\Select::make('roles')
                     ->label('Roles')
                     ->relationship('roles', 'name')
+                    ->required()
                     ->preload()
+                    ->options(
+                        function () {
+                            if (auth()->user()->isTeacher())
+                                return Role::where('name', 'student')->pluck('name', 'id')->toArray();
+                            else
+                                return Role::all()->pluck('name', 'id')->toArray();
+                        }
+                    )
                     ->searchable()
-                    ->visible(auth()->user()->isAdmin()),
+                    ->visible(function (callable $set) {
+                        return auth()->user()->hasRole(['administrator', 'teacher']);
+                    })
+                    ->hiddenOn('edit'),
+
                 Forms\Components\TextInput::make('password')
                     ->password()
                     ->required()
+                    ->hiddenOn('edit'),
+
+                Forms\Components\TextInput::make('remember_token')
+                    ->required()
+                    ->disabled()
+                    ->visible(function (callable $get, $set) {
+                        if (!$get('remember_token')) {
+                            $set('remember_token', Str::random(10));
+                        }
+                        return auth()->user()->hasRole(['administrator']);
+                    })
+                    ->dehydrated()
+                    ->dehydratedWhenHidden()
                     ->hiddenOn('edit'),
             ]);
     }
@@ -110,16 +147,38 @@ class UserResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')->searchable()->label('Nama'),
                 Tables\Columns\TextColumn::make('email'),
+                Tables\Columns\TextColumn::make('student_classes.name')->label('Kelas')->hidden(auth()->user()->isAdmin()),
                 Tables\Columns\TextColumn::make('roles.name')->label('Role')->badge()->colors([
                     'danger' => 'guest',
                     'success' => 'administrator',
                     'primary' => 'student',
                     'warning' => 'teacher',
                 ])->visible(auth()->user()->isAdmin()),
-                Tables\Columns\ViewColumn::make('email_verified_at')->view('tables.columns.status-switcher')
+                Tables\Columns\ViewColumn::make('email_verified_at')->view('tables.columns.status-switcher')->visible(auth()->user()->isAdmin())
             ])
             ->filters([
-                //
+                Tables\Filters\Filter::make('Kelas')
+                    ->label('Filter Kelas')
+                    ->form([
+                        Forms\Components\Select::make('kelas')
+                            ->options(function () {
+                                $kelas = StudentClass::all()->pluck('name', 'id')->toArray();
+                                return $kelas + ['has_no_class' => 'Tanpa Kelas'];
+                            })
+                    ])
+                    // ->relationship('student_classes', 'name')
+                    ->query(function ($data, Builder $query) {
+                        if ($data['kelas'] === 'has_no_class') {
+                            return $query->whereDoesntHave('student_classes');
+                        } elseif ($data['kelas'] === '1' || $data['kelas'] === '2') {
+                            return $query->whereHas('student_classes', function (Builder $query) use ($data) {
+                                $query->where('student_class_id', $data);
+                            })->pluck('name', 'id');
+                        } else {
+                            return $query;
+                        }
+                    }),
+                // Tables\Filters\Filter::make('has_no_class')->label('Belum punya kelas')->baseQuery(fn(Builder $query) => $query->whereDoesntHave('student_classes')),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

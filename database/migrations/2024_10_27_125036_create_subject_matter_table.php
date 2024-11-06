@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('video_link')->nullable();
             $table->boolean('is_has_assigment')->default(false);
             $table->text('assigment_content')->nullable();
+            $table->dateTime('due_to');
             $table->timestamps();
         });
 

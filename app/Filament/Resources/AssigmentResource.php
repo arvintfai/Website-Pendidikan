@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use Carbon\Carbon;
 use App\Filament\Resources\AssigmentResource\Pages;
 use App\Filament\Resources\AssigmentResource\RelationManagers;
 use App\Models\Assigment;
@@ -20,6 +21,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Grouping\Group;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class AssigmentResource extends Resource
@@ -31,7 +33,7 @@ class AssigmentResource extends Resource
      */
     protected static ?string $model = Assigment::class;
 
-    protected static ?string $modelLabel = 'Tugas';
+    // protected static ?string $modelLabel = 'Tugas';
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document';
 
@@ -42,7 +44,9 @@ class AssigmentResource extends Resource
      */
     public static function canAccess(): bool
     {
-        return auth()->user()->hasRole(['administrator', 'teacher']);
+        static::$modelLabel = auth()->user()->isStudent() ? 'Nilai Tugas' : 'Tugas';
+
+        return auth()->user()->hasRole(['administrator', 'teacher', 'student']);
     }
 
     public static function canCreate(): bool
@@ -57,7 +61,11 @@ class AssigmentResource extends Resource
      */
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return parent::getEloquentQuery()->with('user.student_classes');
+        if (Auth::user()->isStudent()) {
+            return parent::getEloquentQuery()->where('user_id', auth()->user()->id);
+        } else {
+            return parent::getEloquentQuery();
+        }
     }
 
     /**
@@ -86,23 +94,33 @@ class AssigmentResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('user.name')->label('Siswa')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('user.student_classes.name')->label('Kelas')->badge()->sortable()->color(Color::Blue),
+                Tables\Columns\TextColumn::make('user.name')->label('Siswa')->searchable(!Auth::user()->isStudent())->sortable()->hidden(Auth::user()->isStudent()),
+                Tables\Columns\TextColumn::make('user.student_classes.name')->label('Kelas')->badge()->sortable()->color(Color::Blue)->hidden(Auth::user()->isStudent()),
                 Tables\Columns\TextColumn::make('subject_matter.name')->label('Materi'),
-                Tables\Columns\ColumnGroup::make('created_at', [
-                    Tables\Columns\TextColumn::make('day')->label('Hari')
-                        ->dateTime('l', 'Asia/Jakarta')
-                        ->getStateUsing(fn($record) => $record->created_at),
-                    Tables\Columns\TextColumn::make('created_at')->label('Tanggal')
-                        ->dateTime('d-m-Y', 'Asia/Jakarta')
-                        ->getStateUsing(fn($record) => $record->created_at)
-                        ->sinceTooltip()
-                        ->sortable(),
-                    Tables\Columns\TextColumn::make('time')->label('Waktu')
-                        ->getStateUsing(fn($record) => $record->created_at)
-                        ->dateTime('H:i', 'Asia/Jakarta'),
-                ])
-                    ->label('Dikumpulkan pada'),
+                Tables\Columns\TextColumn::make('created_at')->label('Dikumpulkan pada')
+                    ->getStateUsing(fn($record) => Carbon::parse($record->created_at)
+                        ->locale('id')
+                        ->translatedFormat('l, d M Y H:i'))
+                    ->color(function ($record) {
+                        return strtotime($record->created_at) > strtotime($record->subject_matter->due_to) ? 'danger' : null;
+                    }),
+
+                // Tables\Columns\ColumnGroup::make('created_at', [
+                //     Tables\Columns\TextColumn::make('day')->label('Hari')
+                //         // ->dateTime('l', 'Asia/Jakarta')
+                //         ->getStateUsing(fn($record) => Carbon::parse($record->created_at)
+                //             ->locale('id')
+                //             ->translatedFormat('l')),
+                //     Tables\Columns\TextColumn::make('created_at')->label('Tanggal')
+                //         ->dateTime('d-m-Y', 'Asia/Jakarta')
+                //         ->getStateUsing(fn($record) => $record->created_at)
+                //         ->sinceTooltip()
+                //         ->sortable(),
+                //     Tables\Columns\TextColumn::make('time')->label('Waktu')
+                //         ->getStateUsing(fn($record) => $record->created_at)
+                //         ->dateTime('H:i', 'Asia/Jakarta'),
+                // ])
+                //     ->label('Dikumpulkan pada'),
                 Tables\Columns\TextColumn::make('scores')
                     ->label('Nilai')
                     ->placeholder('Belum ada Nilai')
@@ -151,11 +169,11 @@ class AssigmentResource extends Resource
                             ->body('Nilai tugas telah diperbarui!')
                             ->success()
                             ->send();
-                    })
+                    })->hidden(Auth::user()->isStudent()),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()->hidden(Auth::user()->isStudent()),
                     Tables\Actions\BulkAction::make('empty_score')
                         ->label('Kosongi nilai')
                         ->action(function (Collection $records) {
@@ -167,7 +185,8 @@ class AssigmentResource extends Resource
                                 ->send();
                         })
                         ->icon('heroicon-o-minus-circle')
-                        ->color('warning'),
+                        ->color('warning')
+                        ->hidden(Auth::user()->isStudent()),
 
                 ]),
             ])
@@ -180,7 +199,8 @@ class AssigmentResource extends Resource
                     ->label('Nama Siswa')
             ])
             ->defaultSort('created_at', 'desc')
-            ->searchPlaceholder('cari Nama Siswa');
+            ->searchPlaceholder('cari Nama Siswa')
+            ->paginated(!Auth::user()->isStudent());
     }
 
     public static function getRelations(): array

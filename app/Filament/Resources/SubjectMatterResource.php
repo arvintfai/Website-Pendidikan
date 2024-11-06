@@ -9,6 +9,7 @@ use App\Filament\Resources\SubjectMatterResource\Pages;
 use App\Filament\Resources\SubjectMatterResource\RelationManagers;
 use App\Models\SubjectMatter;
 use App\Models\User;
+use Carbon\Carbon;
 use Closure;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -94,7 +95,7 @@ class SubjectMatterResource extends Resource
                     ->acceptedFileTypes(['application/pdf'])
                     ->directory('subject_matters'),
 
-                Forms\Components\Grid::make(1) // Membuat grid dengan 3 kolom
+                Forms\Components\Grid::make(1)
                     ->schema([
                         Forms\Components\Toggle::make('use_text_input')
                             ->label('Gunakan Link Teks sebagai Input Video')
@@ -159,15 +160,28 @@ class SubjectMatterResource extends Resource
                             ->afterStateUpdated(
                                 function (callable $get, $set) {
                                     if (!$get('is_has_assigment')) {
-                                        $set('content_assigment', '');
+                                        $set('assigment_content', null);
+                                        $set('due_to', null);
                                     }
                                 }
                             )
+                            ->dehydrated(true),
+
+                        Forms\Components\DateTimePicker::make('due_to')
+                            ->label('Terakhir pengumpulan')
+                            ->reactive()
+                            ->required(fn($get) => $get('is_has_assigment'))
+                            ->format('Y-m-d H:i:s')
+                            ->locale('id')
+                            ->timezone('Asia/Jakarta')
+                            ->visible(fn($get) => $get('is_has_assigment'))
+                            ->dehydratedWhenHidden(true)
                             ->dehydrated(true),
                     ]),
                 Forms\Components\TextArea::make('assigment_content')
                     ->label('Keterangan Tugas')
                     ->autosize()
+                    ->required(fn($get) => $get('is_has_assigment'))
                     ->dehydratedWhenHidden(true)
                     ->visible(function (callable $get, $set) {
                         return $get('is_has_assigment');
@@ -191,7 +205,10 @@ class SubjectMatterResource extends Resource
                         ->label('Nama')
                         ->wrap()
                         ->description(fn($record) => $record->assigment_content ? 'Tugas : ' . $record->assigment_content : null)
-                        ->color(Color::Violet),
+                        ->color(Color::Violet)
+                        ->tooltip(fn($record) => $record->due_to ? 'Batas waktu pengumpulan : ' . Carbon::parse($record->due_to)
+                            ->locale('id')
+                            ->translatedFormat('l, d M Y H:i') : false),
 
                     Tables\Columns\TextColumn::make('wasOpened')
                         ->label('Status')
@@ -348,6 +365,13 @@ class SubjectMatterResource extends Resource
                 ->columns([
                     Tables\Columns\TextColumn::make('name')->sortable()->searchable()->label('Nama')->wrap()->description(fn($record) => $record->assigment_content ? 'Tugas : ' . $record->assigment_content : null),
                     Tables\Columns\TextColumn::make('student_classes.name')->label('Kelas')->badge(),
+                    Tables\Columns\TextColumn::make('due_to')->label('Terakhir Pengumpulan')
+                        ->getStateUsing(fn($record) => Carbon::parse($record->due_to)
+                            ->locale('id')
+                            ->translatedFormat('l, d M Y H:i'))
+                    // ->tooltip(fn($record) => Carbon::parse($record->due_to)
+                    //     ->locale('id')
+                    //     ->translatedFormat('l'))
                 ])
                 ->filters([
                     //
@@ -378,7 +402,6 @@ class SubjectMatterResource extends Resource
                             ->hidden(fn($record) => !$record->video_path && !$record->video_link),
                     ])
                         ->label('Materi')
-                        // ->button()
                         ->link()
                         ->color('info'),
                 ])

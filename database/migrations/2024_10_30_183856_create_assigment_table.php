@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('subject_matter_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('file_name');
+            $table->decimal('scores');
             $table->timestamps();
         });
     }

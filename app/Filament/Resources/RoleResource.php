@@ -23,6 +23,8 @@ class RoleResource extends Resource
      */
     protected static ?string $model = ModelsRole::class;
 
+    protected static ?string $modelLabel = 'Role';
+
     protected static ?string $navigationIcon = 'heroicon-m-briefcase';
 
     protected static ?string $navigationGroup = 'Settings';
@@ -52,10 +54,9 @@ class RoleResource extends Resource
                     ->required(),
                 Forms\Components\Select::make('permisson')
                     ->label('Izin')
-                    ->relationship('permissions', 'name') // Relasi 'roles' dengan nama 'name'
-                    ->multiple() // Memungkinkan memilih beberapa role sekaligus
-                    ->preload() // Preload options untuk mempercepat pencarian
-                    // ->required()
+                    ->relationship('permissions', 'name')
+                    ->multiple()
+                    ->preload()
                     ->searchable(),
             ]);
     }
@@ -72,7 +73,7 @@ class RoleResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')->searchable()->label('Nama'),
-                Tables\Columns\TextColumn::make('permissions.name'),
+                Tables\Columns\TextColumn::make('permissions.name')->label('Nama Izin')->badge(),
             ])
             ->filters([
                 //

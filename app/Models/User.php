@@ -29,6 +29,7 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
+        'remember_token',
     ];
 
     /**
@@ -38,7 +39,7 @@ class User extends Authenticatable implements FilamentUser
      */
     protected $hidden = [
         'password',
-        'remember_token',
+        // 'remember_token',
     ];
 
     /**

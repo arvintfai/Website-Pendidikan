@@ -23,6 +23,8 @@ class PermissionResource extends Resource
      */
     protected static ?string $model = ModelsPermission::class;
 
+    protected static ?string $modelLabel = 'Permissions';
+
     protected static ?string $navigationIcon = 'heroicon-s-arrow-long-right';
 
     protected static ?string $navigationGroup = 'Settings';

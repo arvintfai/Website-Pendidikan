@@ -37,7 +37,7 @@ class ProfileController extends Controller
 
         // return Redirect::route('profile.edit')->with('status', 'profile-updated');
 
-        return redirect('/admin/edit-profile')->with('status', 'profile-updated');
+        return redirect('/belajar/edit-profile')->with('status', 'profile-updated');
     }
 
     /**

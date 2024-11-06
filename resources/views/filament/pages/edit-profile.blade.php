@@ -7,17 +7,17 @@
                 </div>
             </div>
 
-            <div class="p-4 bg-white shadow sm:p-8 dark:bg-gray-900 sm:rounded-lg">
+            {{-- <div class="p-4 bg-white shadow sm:p-8 dark:bg-gray-900 sm:rounded-lg">
                 <div class="max-w-xl">
                     @include('profile.partials.update-profile-information-form')
                 </div>
-            </div>
+            </div> --}}
 
-            <div class="p-4 bg-white shadow sm:p-8 dark:bg-gray-900 sm:rounded-lg">
+            {{-- <div class="p-4 bg-white shadow sm:p-8 dark:bg-gray-900 sm:rounded-lg">
                 <div class="max-w-xl">
                     @include('profile.partials.verify-email-button')
                 </div>
-            </div>
+            </div> --}}
 
             <div class="p-4 bg-white shadow sm:p-8 dark:bg-gray-900 sm:rounded-lg">
                 <div class="max-w-xl">
@@ -25,11 +25,11 @@
                 </div>
             </div>
 
-            <div class="p-4 bg-white shadow sm:p-8 dark:bg-gray-900 sm:rounded-lg">
+            {{-- <div class="p-4 bg-white shadow sm:p-8 dark:bg-gray-900 sm:rounded-lg">
                 <div class="max-w-xl">
                     @include('profile.partials.delete-user-form')
                 </div>
-            </div>
+            </div> --}}
         </div>
     </div>
 </x-filament-panels::page>

@@ -23,6 +23,7 @@ class SubjectMatter extends Model
         'video_link',
         'is_has_assigment',
         'assigment_content',
+        'due_to',
     ];
 
     /**

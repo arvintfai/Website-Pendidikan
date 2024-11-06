@@ -2,16 +2,23 @@
 
 namespace App\Filament\Pages;
 
+use Filament\Widgets;
+use Filament\Panel;
 use Filament\Pages\Page;
 use Filament\Facades\Filament;
 use Filament\Support\Facades\FilamentIcon;
 use Filament\Widgets\Widget;
 use Filament\Widgets\WidgetConfiguration;
+use Filament\Pages\Dashboard as BaseDashboard;
 use Illuminate\Contracts\Support\Htmlable;
 
 class Dashboard extends Page
 {
+    protected static string $routePath = '/';
+
     protected static ?string $label = 'Dashboard';
+
+    // protected static ?string $title = 'Dashboard';
 
     protected static ?string $navigationIcon = 'heroicon-o-home';
 
@@ -33,12 +40,21 @@ class Dashboard extends Page
             ?? (Filament::hasTopNavigation() ? 'heroicon-m-home' : 'heroicon-o-home');
     }
 
+    public static function getRoutePath(): string
+    {
+        return static::$routePath;
+    }
+
     /**
      * @return array<class-string<Widget> | WidgetConfiguration>
      */
     public function getWidgets(): array
     {
-        return Filament::getWidgets();
+        // return Filament::getWidgets();
+        return [
+            Widgets\AccountWidget::class,
+            Widgets\FilamentInfoWidget::class,
+        ];
     }
 
     /**
