@@ -33,7 +33,7 @@ class AssigmentResource extends Resource
      */
     protected static ?string $model = Assigment::class;
 
-    // protected static ?string $modelLabel = 'Tugas';
+    protected static ?string $modelLabel = 'Tugas';
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document';
 

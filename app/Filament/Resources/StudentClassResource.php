@@ -49,9 +49,10 @@ class StudentClassResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
+                    ->label('Nama')
                     ->required(),
                 Forms\Components\Select::make('user')
-                    ->label('Student')
+                    ->label('Siswa')
                     ->relationship('users', 'name') // Relasi 'roles' dengan nama 'name'
                     ->options(function () {
                         return User::whereHas('roles', function ($query) {
@@ -78,7 +79,7 @@ class StudentClassResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')->searchable()->label('Nama'),
-                Tables\Columns\TextColumn::make('users.name')->label('student')->badge(),
+                Tables\Columns\TextColumn::make('users.name')->label('Siswa')->badge(),
             ])
             ->filters([
                 //

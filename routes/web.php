@@ -4,6 +4,7 @@ use App\Models\SubjectMatter;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StudentQuizController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
@@ -22,6 +23,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/users/{id}/send-verification', [EmailController::class, 'send'])->name('users.sendVerification');
     Route::post('/profile/upload-avatar', [ProfileController::class, 'uploadAvatar'])->name('profile.uploadAvatar');
     Route::delete('/profile/destory-avatar', [ProfileController::class, 'destroyAvatar'])->name('profile.destroyAvatar');
+    // Route::get('/quiz/{quiz}', [StudentQuizController::class, 'show'])->name('student.quiz.show');
+    Route::post('/quiz/{quiz}', [StudentQuizController::class, 'store'])->name('student.quiz.store');
 });
 
 require __DIR__ . '/auth.php';

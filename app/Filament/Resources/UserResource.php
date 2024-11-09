@@ -92,8 +92,7 @@ class UserResource extends Resource
                 Forms\Components\TextInput::make('email')
                     ->label('username')
                     // ->email()
-                    ->required()
-                    ->hiddenOn('edit'),
+                    ->required(),
 
                 Forms\Components\Select::make('roles')
                     ->label('Roles')
@@ -120,7 +119,9 @@ class UserResource extends Resource
                     ->hiddenOn('edit'),
 
                 Forms\Components\TextInput::make('remember_token')
-                    ->required()
+                    ->required(function (callable $get) {
+                        return !$get('remember_token') ? false : true;
+                    })
                     ->disabled()
                     ->visible(function (callable $get, $set) {
                         if (!$get('remember_token')) {
@@ -146,7 +147,7 @@ class UserResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')->searchable()->label('Nama'),
-                Tables\Columns\TextColumn::make('email'),
+                Tables\Columns\TextColumn::make('email')->label('Nama Pengguna'),
                 Tables\Columns\TextColumn::make('student_classes.name')->label('Kelas')->hidden(auth()->user()->isAdmin()),
                 Tables\Columns\TextColumn::make('roles.name')->label('Role')->badge()->colors([
                     'danger' => 'guest',
@@ -154,7 +155,7 @@ class UserResource extends Resource
                     'primary' => 'student',
                     'warning' => 'teacher',
                 ])->visible(auth()->user()->isAdmin()),
-                Tables\Columns\ViewColumn::make('email_verified_at')->view('tables.columns.status-switcher')->visible(auth()->user()->isAdmin())
+                Tables\Columns\ViewColumn::make('email_verified_at')->view('tables.columns.status-switcher')->visible(false)
             ])
             ->filters([
                 Tables\Filters\Filter::make('Kelas')

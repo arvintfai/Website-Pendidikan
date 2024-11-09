@@ -178,6 +178,7 @@ class SubjectMatterResource extends Resource
                             ->dehydratedWhenHidden(true)
                             ->dehydrated(true),
                     ]),
+
                 Forms\Components\TextArea::make('assigment_content')
                     ->label('Keterangan Tugas')
                     ->autosize()
