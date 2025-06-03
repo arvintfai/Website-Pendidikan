@@ -2,25 +2,31 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
-use App\Models\User;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Pages\Actions\Modal\Actions\ButtonAction;
-use Filament\Resources\Resource;
+use App\Models\User;
 use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+use Filament\Forms\Form;
+use Filament\Tables\Table;
+use Illuminate\Support\Str;
+use App\Exports\UsersExport;
+use App\Models\StudentClass;
+use Filament\Resources\Resource;
 use Spatie\Permission\Models\Role;
 use Filament\Tables\Grouping\Group;
+use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Validation\Rules\File;
+use App\Filament\Exports\UserExporter;
+use App\Filament\Imports\UserImporter;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
-use App\Models\StudentClass;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use App\Filament\Resources\UserResource\Pages;
+use Filament\Actions\Exports\Enums\ExportFormat;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Pages\Actions\Modal\Actions\ButtonAction;
+use App\Filament\Resources\UserResource\RelationManagers;
 
 class UserResource extends Resource
 {
@@ -90,7 +96,7 @@ class UserResource extends Resource
                     ->label('Nama')
                     ->required(),
                 Forms\Components\TextInput::make('email')
-                    ->label('username')
+                    ->label('Nama pengguna')
                     // ->email()
                     ->required(),
 
@@ -107,10 +113,13 @@ class UserResource extends Resource
                                 return Role::all()->pluck('name', 'id')->toArray();
                         }
                     )
-                    ->searchable()
-                    ->visible(function (callable $set) {
-                        return auth()->user()->hasRole(['administrator', 'teacher']);
-                    })
+                    ->default(
+                        fn() => Role::where('name', 'student')->pluck('id')->first()
+                    )
+                    // ->default('4')
+                    ->visible(fn() => auth()->user()->hasRole(['administrator', 'teacher']))
+                    ->dehydrated()
+                    ->dehydratedWhenHidden()
                     ->hiddenOn('edit'),
 
                 Forms\Components\TextInput::make('password')
@@ -145,10 +154,19 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->headerActions([
+                // Tables\Actions\ExportAction::make()
+                //     ->exporter(UserExporter::class)
+                // Tables\Actions\ImportAction::make()
+                //     ->importer(UserImporter::class)
+                //     ->fileRules([
+                //         File::types(['csv', 'xls'])
+                //     ])
+            ])
             ->columns([
                 Tables\Columns\TextColumn::make('name')->searchable()->label('Nama'),
                 Tables\Columns\TextColumn::make('email')->label('Nama Pengguna'),
-                Tables\Columns\TextColumn::make('student_classes.name')->label('Kelas')->hidden(auth()->user()->isAdmin()),
+                Tables\Columns\TextColumn::make('student_classes.name')->label('Kelas')->hidden(auth()->user()->isAdmin())->placeholder('Tidak terikat kelas manapun'),
                 Tables\Columns\TextColumn::make('roles.name')->label('Role')->badge()->colors([
                     'danger' => 'guest',
                     'success' => 'administrator',
@@ -201,10 +219,25 @@ class UserResource extends Resource
                         ])
                         ->requiresConfirmation()
                         ->color('success')
-                        ->icon('heroicon-o-user'),
+                        ->icon('heroicon-o-user')
+                        ->hidden(auth()->user()->isTeacher()),
+                    Tables\Actions\BulkAction::make('export')
+                        ->label('Export to Excel')
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->action(
+                            function (Collection $records) {
+                                return Excel::download(new UsersExport($records), 'student-' . now() . '.xlsx');
+                            }
+                        )
                 ]),
+                // Tables\Actions\ExportBulkAction::make()->exporter(UserExporter::class)
             ])
+            ->defaultPaginationPageOption(25)
+            ->extremePaginationLinks()
             ->defaultSort('name')
+            ->emptyStateHeading('Kosong')
+            ->emptyStateDescription('Data tidak ada')
+            ->emptyStateIcon('heroicon-o-users')
             // ->groups([Group::make('roles.name')
             //     ->label('Role')])
         ;

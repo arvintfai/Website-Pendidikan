@@ -23,7 +23,7 @@ class StudentClassResource extends Resource
      */
     protected static ?string $model = StudentClass::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
 
     protected static ?string $modelLabel = 'Kelas';
 
@@ -53,7 +53,7 @@ class StudentClassResource extends Resource
                     ->required(),
                 Forms\Components\Select::make('user')
                     ->label('Siswa')
-                    ->relationship('users', 'name') // Relasi 'roles' dengan nama 'name'
+                    ->relationship('users', 'name')
                     ->options(function () {
                         return User::whereHas('roles', function ($query) {
                             $query->where('name', 'student');
@@ -61,8 +61,8 @@ class StudentClassResource extends Resource
                             ->whereDoesntHave('student_classes')
                             ->pluck('name', 'id');
                     })
-                    ->multiple() // Memungkinkan memilih beberapa role sekaligus
-                    ->preload() // Preload options untuk mempercepat pencarian
+                    ->multiple()
+                    ->preload()
                     ->searchable(),
             ]);
     }
@@ -92,7 +92,9 @@ class StudentClassResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading('Kosong')
+            ->emptyStateDescription('Data tidak ada');
     }
 
     public static function getRelations(): array

@@ -206,7 +206,7 @@ class SubjectMatterResource extends Resource
                         ->label('Nama')
                         ->wrap()
                         ->description(fn($record) => $record->assigment_content ? 'Tugas : ' . $record->assigment_content : null)
-                        ->color(Color::Violet)
+                        // ->color()
                         ->tooltip(fn($record) => $record->due_to ? 'Batas waktu pengumpulan : ' . Carbon::parse($record->due_to)
                             ->locale('id')
                             ->translatedFormat('l, d M Y H:i') : false),
@@ -254,12 +254,19 @@ class SubjectMatterResource extends Resource
 
                         ->getStateUsing(function ($record) {
                             $assigment = Assigment::where('subject_matter_id', $record->id)->where('user_id', auth()->user()->id)->first();
-                            if ($record->is_has_assigment)
+                            if ($record->is_has_assigment) {
                                 return $assigment ? 'Lihat Tugas Saat ini' : 'Belum mengumpulkan';
+                            } else {
+                                return 'Tidak ada tugas';
+                            }
                         })
                         ->color(function ($record) {
-                            $assigment = Assigment::where('subject_matter_id', $record->id)->where('user_id', auth()->user()->id)->first();
-                            return $assigment ? 'success' : 'danger';
+                            if ($record->is_has_assigment) {
+                                $assigment = Assigment::where('subject_matter_id', $record->id)->where('user_id', auth()->user()->id)->first();
+                                return $assigment ? 'success' : 'danger';
+                            } else {
+                                return 'slate';
+                            }
                         })
                         ->icon(function ($record) {
                             $assigment = Assigment::where('subject_matter_id', $record->id)->where('user_id', auth()->user()->id)->first();
@@ -367,12 +374,15 @@ class SubjectMatterResource extends Resource
                     Tables\Columns\TextColumn::make('name')->sortable()->searchable()->label('Nama')->wrap()->description(fn($record) => $record->assigment_content ? 'Tugas : ' . $record->assigment_content : null),
                     Tables\Columns\TextColumn::make('student_classes.name')->label('Kelas')->badge(),
                     Tables\Columns\TextColumn::make('due_to')->label('Terakhir Pengumpulan')
-                        ->getStateUsing(fn($record) => Carbon::parse($record->due_to)
-                            ->locale('id')
-                            ->translatedFormat('l, d M Y H:i'))
-                    // ->tooltip(fn($record) => Carbon::parse($record->due_to)
-                    //     ->locale('id')
-                    //     ->translatedFormat('l'))
+                        ->getStateUsing(function ($record) {
+                            if ($record->due_to) {
+                                return Carbon::parse($record->due_to)
+                                    ->locale('id')
+                                    ->translatedFormat('l, d M Y H:i');
+                            } else {
+                                return "Tidak ada tugas";
+                            }
+                        })
                 ])
                 ->filters([
                     //
@@ -410,7 +420,9 @@ class SubjectMatterResource extends Resource
                     Tables\Actions\BulkActionGroup::make([
                         Tables\Actions\DeleteBulkAction::make(),
                     ]),
-                ]);
+                ])
+                ->emptyStateHeading('Kosong')
+                ->emptyStateDescription('Data tidak ada');
         }
     }
 

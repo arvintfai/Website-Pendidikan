@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\Announcement;
 use Filament\Widgets;
 use Filament\Panel;
 use Filament\Pages\Page;
@@ -54,6 +55,7 @@ class Dashboard extends Page
         return [
             Widgets\AccountWidget::class,
             Widgets\FilamentInfoWidget::class,
+            Announcement::class,
         ];
     }
 

@@ -61,7 +61,7 @@ class SubjectMatter extends Model
      */
     public function student_classes(): BelongsToMany
     {
-        return $this->BelongSToMany(StudentClass::class, 'subject_matter_has_class');
+        return $this->BelongsToMany(StudentClass::class, 'subject_matter_has_class');
     }
 
     /**

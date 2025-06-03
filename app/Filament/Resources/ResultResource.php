@@ -16,6 +16,11 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ResultResource extends Resource
 {
+    /**
+     * Define string variable
+     *
+     * @var string|null
+     */
     protected static ?string $model = Result::class;
 
     protected static ?string $modelLabel = 'Quiz';
@@ -32,6 +37,13 @@ class ResultResource extends Resource
         return auth()->user()->isStudent();
     }
 
+    /**
+     * Form builder to make form create and edit data
+     *
+     * @param Form $form
+     *
+     * @return Form
+     */
     public static function form(Form $form): Form
     {
         return $form
@@ -40,6 +52,13 @@ class ResultResource extends Resource
             ]);
     }
 
+    /**
+     * Table builder to make table more faster
+     *
+     * @param Table $table
+     *
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -74,7 +93,9 @@ class ResultResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading('Kosong')
+            ->emptyStateDescription('Data tidak ada');
     }
 
     public static function getRelations(): array
@@ -84,6 +105,11 @@ class ResultResource extends Resource
         ];
     }
 
+    /**
+     * Define a route list for filament CRUD
+     *
+     * @return array
+     */
     public static function getPages(): array
     {
         return [

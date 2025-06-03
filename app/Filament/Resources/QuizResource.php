@@ -17,6 +17,11 @@ use Illuminate\Support\Str;
 
 class QuizResource extends Resource
 {
+    /**
+     * Define string variable
+     *
+     * @var string|null
+     */
     protected static ?string $model = Quiz::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-star';
@@ -97,6 +102,13 @@ class QuizResource extends Resource
             ]);
     }
 
+    /**
+     * Table builder for create table more faster
+     *
+     * @param Table $table
+     *
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -126,7 +138,9 @@ class QuizResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading('Kosong')
+            ->emptyStateDescription('Data tidak ada');
     }
 
     public static function getRelations(): array
@@ -136,6 +150,11 @@ class QuizResource extends Resource
         ];
     }
 
+    /**
+     * Define route list for filament CRUD
+     *
+     * @return array
+     */
     public static function getPages(): array
     {
         return [

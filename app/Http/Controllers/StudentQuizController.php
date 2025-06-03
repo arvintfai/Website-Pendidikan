@@ -12,6 +12,14 @@ use Illuminate\Http\Request;
 
 class StudentQuizController extends Controller
 {
+    /**
+     * Store the quiz's data to table StudentAnswer
+     *
+     * @param Request $request
+     * @param Quiz $quiz
+     *
+     * @return [type]
+     */
     public function store(Request $request, Quiz $quiz)
     {
         $studentId = auth()->id();

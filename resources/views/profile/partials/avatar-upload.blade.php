@@ -13,23 +13,23 @@
         @csrf
         <div class="mb-4">
             @if (Auth::user()->avatar)
-                <img class="fi-avatar object-cover object-center fi-circular rounded-full h-32 w-32 mb-3"
+                <img class="object-cover object-center w-32 h-32 mb-4 rounded-full fi-avatar fi-circular"
                     src={{ asset('storage/' . Auth::user()->avatar) }}>
             @endif
 
             <div class="grid w-full max-w-xs items-center gap-1.5">
                 <label for="avatar"
-                    class="text-sm text-gray-400 font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    class="text-sm font-medium leading-none text-gray-400 peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                     {{ Auth::user()->avatar ? 'Change' : 'Choose' }}
                     Photo
                     Profile</label>
                 <input name="avatar"
-                    class="flex w-full rounded-md border border-blue-300 border-input bg-white text-sm text-gray-400 file:border-0 file:bg-blue-600 file:text-white file:text-sm file:font-medium"
+                    class="flex w-full text-sm text-gray-400 bg-white border border-blue-300 rounded-md border-input file:border-0 file:bg-blue-600 file:text-white file:text-sm file:font-medium"
                     type="file" id="avatar" />
             </div>
 
             @error('avatar')
-                <span class="text-red-500 text-sm">{{ $message }}</span>
+                <span class="text-sm text-red-500">{{ $message }}</span>
             @enderror
         </div>
 

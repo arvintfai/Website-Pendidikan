@@ -7,7 +7,9 @@ export default {
         "./resources/**/*.blade.php",
         "./resources/**/*.js",
         "./resources/**/*.vue",
+        // "./node_modules/flowbite/**/*.js",
         "./resources/views/**/*.blade.php",
         "./vendor/filament/**/*.blade.php",
     ],
+    // plugins: [require("flowbite/plugin")],
 };

@@ -8,6 +8,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class StudentClass extends Model
 {
+
+    /**
+     * Define name of table
+     *
+     * @var string
+     */
+    protected $table = 'student_classes';
+
     /**
      * The attributes that are mass assignable.
      *

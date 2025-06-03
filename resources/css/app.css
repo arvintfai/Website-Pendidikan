@@ -1,4 +1,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@tailwind variants;
+/* @tailwind variants; */
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+
+/* @import "flowbite/src/themes/default"; */
+/* @import 'flowbite'; */
+@source "../../node_modules/flowbite";
+@plugin "flowbite/plugin";
+@plugin "flowbite-typography";

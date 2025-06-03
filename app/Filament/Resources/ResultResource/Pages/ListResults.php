@@ -12,8 +12,18 @@ use Filament\Notifications\Notification;
 
 class ListResults extends ListRecords
 {
+    /**
+     * Define variable with data type string
+     *
+     * @var string
+     */
     protected static string $resource = ResultResource::class;
 
+    /**
+     * Schema for set the Header Action on page list
+     *
+     * @return array
+     */
     protected function getHeaderActions(): array
     {
         return [
@@ -29,7 +39,7 @@ class ListResults extends ListRecords
                     function (array $data, Form $form) {
                         $quizzes = Quiz::all();
                         foreach ($quizzes as $quiz) {
-                            if ($quiz->access_code === strtoupper($data['access_code']) && $quiz->is_avaible) {
+                            if ($quiz->access_code === strtoupper($data['access_code'])) {
                                 return redirect()->route('filament.belajar.pages.quiz', ['kode_akses' => $quiz->access_code]);
                             }
                         }

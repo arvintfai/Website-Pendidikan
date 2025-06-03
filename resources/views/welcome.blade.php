@@ -12,7 +12,7 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
 
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    {{-- <script defer src="https://cdn.jsdelivr.net//npm/alpinejs@3.x.x/dist/cdn.min.js"></script> --}}
     @filamentStyles()
     <!-- Styles / Scripts -->
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
@@ -927,8 +927,8 @@
                     </div>
                     @if (Route::has('login'))
                         <nav class="flex items-center justify-end flex-1 -mx-3">
+                            <x-theme-button></x-theme-button>
                             @auth
-                                <x-theme-button></x-theme-button>
 
                                 @if (Auth::user()->userHasAccess())
                                     <a href="{{ url('/belajar') }}"
@@ -1175,5 +1175,6 @@
     </div>
 </body>
 @filamentScripts()
+<script src="{{ asset('build/assets/app-Btq7WNAl.js') }}"></script>
 
 </html>

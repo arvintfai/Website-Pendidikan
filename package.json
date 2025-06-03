@@ -17,11 +17,21 @@
         "autoprefixer": "^10.4.20",
         "concurrently": "^9.0.1",
         "cross-env": "^7.0.3",
+        "flowbite": "^3.1.2",
         "laravel-mix": "^6.0.49",
         "laravel-vite-plugin": "^1.0",
-        "postcss": "^8.4.47",
+        "postcss": "^8.5.1",
         "postcss-nesting": "^13.0.1",
-        "tailwindcss": "^3.4.14",
+        "tailwindcss": "^3.4.17",
         "vite": "^5.0"
+    },
+    "dependencies": {
+        "@tiptap/core": "^2.12.0",
+        "@tiptap/pm": "^2.12.0",
+        "@tiptap/starter-kit": "^2.12.0",
+        "flowbite-typography": "^1.0.5"
+    },
+    "overrides": {
+        "prosemirror-model": "1.19.3"
     }
 }

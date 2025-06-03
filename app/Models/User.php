@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements FilamentUser
@@ -33,13 +34,27 @@ class User extends Authenticatable implements FilamentUser
     ];
 
     /**
+     * function Using Closures to hook EventListeners [saved and deleted]
+     *
+     * @return void
+     */
+    protected static function booted(): void
+    {
+        static::deleted(function ($model) {
+            if (! is_null($model->avatar)) {
+                Storage::disk('public')->delete($model->avatar);
+            }
+        });
+    }
+
+    /**
      * The attributes that should be hidden for serialization.
      *
      * @var array<int, string>
      */
     protected $hidden = [
         'password',
-        // 'remember_token',
+        'remember_token',
     ];
 
     /**
@@ -149,5 +164,15 @@ class User extends Authenticatable implements FilamentUser
     public function assigments(): HasMany
     {
         return $this->hasMany(Assigment::class);
+    }
+
+    /**
+     * Relations One to Many with table 'work_results'
+     *
+     * @return HasMany
+     */
+    public function Work_results(): HasMany
+    {
+        return $this->hasMany(work_results::class);
     }
 }

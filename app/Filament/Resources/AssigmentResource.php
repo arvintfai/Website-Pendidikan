@@ -105,22 +105,6 @@ class AssigmentResource extends Resource
                         return strtotime($record->created_at) > strtotime($record->subject_matter->due_to) ? 'danger' : null;
                     }),
 
-                // Tables\Columns\ColumnGroup::make('created_at', [
-                //     Tables\Columns\TextColumn::make('day')->label('Hari')
-                //         // ->dateTime('l', 'Asia/Jakarta')
-                //         ->getStateUsing(fn($record) => Carbon::parse($record->created_at)
-                //             ->locale('id')
-                //             ->translatedFormat('l')),
-                //     Tables\Columns\TextColumn::make('created_at')->label('Tanggal')
-                //         ->dateTime('d-m-Y', 'Asia/Jakarta')
-                //         ->getStateUsing(fn($record) => $record->created_at)
-                //         ->sinceTooltip()
-                //         ->sortable(),
-                //     Tables\Columns\TextColumn::make('time')->label('Waktu')
-                //         ->getStateUsing(fn($record) => $record->created_at)
-                //         ->dateTime('H:i', 'Asia/Jakarta'),
-                // ])
-                //     ->label('Dikumpulkan pada'),
                 Tables\Columns\TextColumn::make('scores')
                     ->label('Nilai')
                     ->placeholder('Belum ada Nilai')
@@ -200,6 +184,8 @@ class AssigmentResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->searchPlaceholder('cari Nama Siswa')
+            ->emptyStateHeading('Kosong')
+            ->emptyStateDescription('Data tidak ada')
             ->paginated(!Auth::user()->isStudent());
     }
 

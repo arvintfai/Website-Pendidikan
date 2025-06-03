@@ -87,7 +87,9 @@ class PermissionResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading('Kosong')
+            ->emptyStateDescription('Data tidak ada');
     }
 
     public static function getRelations(): array
